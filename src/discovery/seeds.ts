@@ -42,7 +42,7 @@ export async function getProtocolUsers(protocolName: string, chain: Address['cha
   return SAMPLE_SEED_WALLETS.filter(wallet => wallet.chain === chain);
 }
 
-export async function getTokenHolders(tokenAddress: string, chain: Address['chain'], minBalance?: string): Promise<Address[]> {
+export async function getTokenHolders(tokenAddress: string, chain: Address['chain'], _minBalance?: string): Promise<Address[]> {
   // TODO: Implement token holder discovery
   // This would involve:
   // - Querying token contracts for Transfer events

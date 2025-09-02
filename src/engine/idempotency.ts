@@ -80,12 +80,12 @@ export class DatabaseIdempotencyStore implements PersistentIdempotencyStore {
   // TODO: Implement database-backed idempotency store
   // This would use the same SQLite database to persist idempotency records
   
-  async hasRecentlyProcessed(hash: string): Promise<boolean> {
+  async hasRecentlyProcessed(_hash: string): Promise<boolean> {
     // TODO: Query database for recent processing of this hash
     throw new Error('DatabaseIdempotencyStore not implemented');
   }
   
-  async markProcessed(hash: string): Promise<void> {
+  async markProcessed(_hash: string): Promise<void> {
     // TODO: Insert/update database record for this hash
     throw new Error('DatabaseIdempotencyStore not implemented');
   }

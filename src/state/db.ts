@@ -64,8 +64,59 @@ export function initDb(dbPath: string): Database.Database {
 
 export function initSchema(db: Database.Database): void {
   const schemaPath = join(__dirname, 'schema.sql');
-  const schema = readFileSync(schemaPath, 'utf-8');
-  db.exec(schema);
+  try {
+    const schema = readFileSync(schemaPath, 'utf-8');
+    db.exec(schema);
+  } catch (error) {
+    // If we can't find the schema file, create tables manually
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS wallets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        address TEXT NOT NULL,
+        chain TEXT NOT NULL,
+        first_seen_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_claim_at DATETIME,
+        total_claimed_usd REAL DEFAULT 0,
+        UNIQUE(address, chain)
+      );
+
+      CREATE TABLE IF NOT EXISTS pending_rewards (
+        id TEXT PRIMARY KEY,
+        wallet_address TEXT NOT NULL,
+        wallet_chain TEXT NOT NULL,
+        protocol TEXT NOT NULL,
+        token_address TEXT NOT NULL,
+        token_chain TEXT NOT NULL,
+        amount_wei TEXT NOT NULL,
+        amount_usd REAL NOT NULL,
+        claim_to_address TEXT NOT NULL,
+        claim_to_chain TEXT NOT NULL,
+        discovered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_claim_at DATETIME,
+        is_stale BOOLEAN DEFAULT FALSE
+      );
+
+      CREATE TABLE IF NOT EXISTS executions (
+        id TEXT PRIMARY KEY,
+        bundle_id TEXT NOT NULL,
+        chain TEXT NOT NULL,
+        protocol TEXT NOT NULL,
+        claim_to_address TEXT NOT NULL,
+        claim_to_chain TEXT NOT NULL,
+        total_usd REAL NOT NULL,
+        est_gas_usd REAL NOT NULL,
+        net_usd REAL NOT NULL,
+        item_count INTEGER NOT NULL,
+        success BOOLEAN NOT NULL,
+        tx_hash TEXT,
+        error_message TEXT,
+        gas_used TEXT,
+        actual_gas_usd REAL,
+        actual_claimed_usd REAL,
+        executed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+  }
 }
 
 export function getDb(): Database.Database {

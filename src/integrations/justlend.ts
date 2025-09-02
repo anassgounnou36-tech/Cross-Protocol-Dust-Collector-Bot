@@ -56,7 +56,7 @@ export const justlendIntegration: Integration = {
         amountUsd: 2.50,
         claimTo: wallet, // Claim back to same wallet
         discoveredAt: new Date(),
-        lastClaimAt: undefined // Never claimed before
+        lastClaimAt: undefined as any // Never claimed before
       };
       
       rewards.push(reward);
@@ -126,22 +126,22 @@ export const JUSTLEND_CONTRACTS = {
 } as const;
 
 // Helper functions for future implementation
-export async function getJTokenBalance(walletAddress: string, jTokenAddress: string): Promise<string> {
+export async function getJTokenBalance(_walletAddress: string, _jTokenAddress: string): Promise<string> {
   // TODO: Implement JToken balance checking
   throw new Error('getJTokenBalance not implemented');
 }
 
-export async function getAccruedInterest(walletAddress: string, jTokenAddress: string): Promise<string> {
+export async function getAccruedInterest(_walletAddress: string, _jTokenAddress: string): Promise<string> {
   // TODO: Implement accrued interest calculation
   throw new Error('getAccruedInterest not implemented');
 }
 
-export async function getPendingJstRewards(walletAddress: string): Promise<string> {
+export async function getPendingJstRewards(_walletAddress: string): Promise<string> {
   // TODO: Implement JST reward checking from comptroller
   throw new Error('getPendingJstRewards not implemented');
 }
 
-export async function buildJustLendClaimTx(rewards: PendingReward[]): Promise<any> {
+export async function buildJustLendClaimTx(_rewards: PendingReward[]): Promise<any> {
   // TODO: Implement actual claim transaction building
   // This would involve calling the appropriate JustLend contract methods
   throw new Error('buildJustLendClaimTx not implemented');

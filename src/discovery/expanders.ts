@@ -94,7 +94,7 @@ export const EXPANSION_STRATEGIES: ExpansionStrategy[] = [
   {
     name: 'token_co_holders',
     weight: 0.6,
-    expand: async (wallets: Address[]) => {
+    expand: async (_wallets: Address[]) => {
       const results: Address[] = [];
       // TODO: Implement token co-holder expansion
       return results;
@@ -103,7 +103,7 @@ export const EXPANSION_STRATEGIES: ExpansionStrategy[] = [
   {
     name: 'contract_peers',
     weight: 0.7,
-    expand: async (wallets: Address[]) => {
+    expand: async (_wallets: Address[]) => {
       const results: Address[] = [];
       // TODO: Implement contract interaction peer expansion
       return results;
@@ -140,7 +140,6 @@ export async function expandWithStrategies(
   strategies: ExpansionStrategy[] = EXPANSION_STRATEGIES,
   maxResults: number = 1000
 ): Promise<Address[]> {
-  const allResults = new Set<string>();
   const resultsByStrategy = new Map<string, Address[]>();
   
   // Run all strategies in parallel

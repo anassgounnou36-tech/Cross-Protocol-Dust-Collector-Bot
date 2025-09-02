@@ -114,12 +114,12 @@ export class Scheduler {
 
     if (this.intervalId) {
       clearTimeout(this.intervalId);
-      this.intervalId = undefined;
+      this.intervalId = undefined as any;
     }
 
     if (this.shutdownResolve) {
       this.shutdownResolve();
-      this.shutdownResolve = undefined;
+      this.shutdownResolve = undefined as any;
     }
 
     logger.info('Scheduler stopped');

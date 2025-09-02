@@ -1,4 +1,5 @@
-import TronWeb from 'tronweb';
+// Simple TronWeb import to avoid type issues
+const TronWeb = require('tronweb');
 import type { ChainClient, ClaimBundle, SimulationResult, TxResult } from '../types/common.js';
 
 export class TronClient implements ChainClient {
@@ -33,6 +34,7 @@ export class TronClient implements ChainClient {
       // Check account resources (energy, bandwidth)
       const address = this.tronWeb.address.fromPrivateKey(this.tronWeb.defaultPrivateKey);
       const account = await this.tronWeb.trx.getAccount(address);
+      console.log('Simulating bundle:', bundle.id);
       
       // Basic check for account existence and balance
       if (!account || !account.balance) {

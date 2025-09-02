@@ -16,7 +16,7 @@ export interface RetryableError extends Error {
 export function createRetryableError(message: string, retryable: boolean = true, retryAfter?: number): RetryableError {
   const error = new Error(message) as RetryableError;
   error.retryable = retryable;
-  error.retryAfter = retryAfter;
+  error.retryAfter = retryAfter || undefined;
   return error;
 }
 

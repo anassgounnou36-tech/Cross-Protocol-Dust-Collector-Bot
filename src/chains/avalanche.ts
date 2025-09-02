@@ -32,7 +32,7 @@ export class AvalancheClient implements ChainClient {
 
       // TODO: Implement actual simulation logic
       // For now, just check if we have enough balance for gas
-      const balance = await this.wallet.provider.getBalance(this.wallet.address);
+      const balance = await this.wallet?.provider?.getBalance(this.wallet.address) || 0n;
       const gasPrice = await this.gasPrice();
       const estimatedGas = 21000n * BigInt(bundle.items.length); // Rough estimate
       const gasRequired = gasPrice * estimatedGas;

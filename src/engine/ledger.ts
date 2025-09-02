@@ -63,7 +63,7 @@ function updateWalletLastClaim(
 ): void {
   try {
     // Ensure wallet exists
-    upsertWallet(db, wallet);
+    upsertWallet(db, wallet as any);
     
     const stmt = db.prepare(`
       UPDATE wallets 
