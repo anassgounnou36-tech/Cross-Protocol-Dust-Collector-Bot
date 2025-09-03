@@ -54,6 +54,7 @@ export interface ChainClient {
   readonly chain: Chain;
   gasPrice(): Promise<bigint>;
   nativeUsd(): Promise<number>;
+  tokenUsd(token: string): Promise<number>;
   simulate(bundle: ClaimBundle): Promise<SimulationResult>;
   sendRaw(bundle: ClaimBundle): Promise<TxResult>;
 }
