@@ -108,6 +108,11 @@ export function estimateBundleGasUsdSync(bundle: ClaimBundle, chain: Chain): num
   return 0;
 }
 
+// Simple async wrapper that uses fallback estimates
+export async function estimateBundleUsd(bundle: ClaimBundle): Promise<number> {
+  return estimateBundleGasUsdSync(bundle, bundle.chain);
+}
+
 export function estimateClaimGasUsd(chain: Chain, itemCount: number = 1): number {
   const mockBundle = {
     id: 'estimate',

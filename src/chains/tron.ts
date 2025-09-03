@@ -24,6 +24,13 @@ export class TronClient implements ChainClient {
     return 0.08; // Placeholder TRX price
   }
 
+  async tokenUsd(token: string): Promise<number> {
+    // For now, return 0 for all tokens with error message
+    console.error(`Unpriced token ${token}`);
+    // TODO: Implement router-based pricing for Tron tokens
+    return 0;
+  }
+
   async simulate(bundle: ClaimBundle): Promise<SimulationResult> {
     try {
       if (!this.tronWeb.defaultPrivateKey) {

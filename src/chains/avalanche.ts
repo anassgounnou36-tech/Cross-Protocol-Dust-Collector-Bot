@@ -6,6 +6,7 @@ export class AvalancheClient implements ChainClient {
   private provider: ethers.JsonRpcProvider;
   private wallet?: ethers.Wallet;
   private gasPriceCache?: { price: bigint; timestamp: number };
+  private pricingCache = new Map<string, { price: number; timestamp: number }>();
   private readonly CACHE_TTL_MS = 30000; // 30 seconds cache
 
   constructor(rpcUrl: string, privateKey?: string) {
@@ -62,8 +63,52 @@ export class AvalancheClient implements ChainClient {
   }
 
   async nativeUsd(): Promise<number> {
+    // Check cache first
+    const cacheKey = `${this.chain}:NATIVE_USD`;
+    const cached = this.pricingCache.get(cacheKey);
+    if (cached) {
+      const age = Date.now() - cached.timestamp;
+      if (age < this.CACHE_TTL_MS) {
+        return cached.price;
+      }
+    }
+
     // TODO: Implement real AVAX price fetching from CoinGecko or DEX
-    return 30.0; // Placeholder AVAX price
+    const price = 30.0; // Placeholder AVAX price
+    
+    // Cache the result
+    this.pricingCache.set(cacheKey, {
+      price,
+      timestamp: Date.now()
+    });
+    
+    return price;
+  }
+
+  async tokenUsd(token: string): Promise<number> {
+    // Check cache first
+    const cacheKey = `${this.chain}:${token}`;
+    const cached = this.pricingCache.get(cacheKey);
+    if (cached) {
+      const age = Date.now() - cached.timestamp;
+      if (age < this.CACHE_TTL_MS) {
+        return cached.price;
+      }
+    }
+
+    // For now, return 0 for all tokens with error message
+    console.error(`Unpriced token ${token}`);
+    // TODO: Implement router-based pricing (DEX aggregator, price feeds, etc.)
+    
+    const price = 0;
+    
+    // Cache the result even for unpriced tokens to avoid repeated errors
+    this.pricingCache.set(cacheKey, {
+      price,
+      timestamp: Date.now()
+    });
+    
+    return price;
   }
 
   async simulate(bundle: ClaimBundle): Promise<SimulationResult> {
