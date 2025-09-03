@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { PendingReward, ClaimBundle } from '../types/common.js';
-import { estimateBundleGasUsd } from '../economics/gas.js';
+import { estimateBundleGasUsdSync } from '../economics/gas.js';
 
 export function groupByContract(items: PendingReward[]): ClaimBundle[] {
   // Group rewards by (chain, protocol, claimTo) as specified in the requirements
@@ -40,7 +40,7 @@ export function groupByContract(items: PendingReward[]): ClaimBundle[] {
     };
 
     // Estimate gas cost for this bundle
-    const estGasUsd = estimateBundleGasUsd(bundle, bundle.chain);
+    const estGasUsd = estimateBundleGasUsdSync(bundle, bundle.chain);
     
     // Create final bundle with gas estimation
     const finalBundle: ClaimBundle = {
@@ -85,7 +85,7 @@ export function splitLargeBundles(bundles: ClaimBundle[], maxSize: number): Clai
         netUsd: 0
       };
 
-      const estGasUsd = estimateBundleGasUsd(chunkBundle, chunkBundle.chain);
+      const estGasUsd = estimateBundleGasUsdSync(chunkBundle, chunkBundle.chain);
       
       const finalChunkBundle: ClaimBundle = {
         ...chunkBundle,
@@ -142,7 +142,7 @@ export function mergeBundles(bundles: ClaimBundle[], minSize: number): ClaimBund
         netUsd: 0
       };
 
-      const estGasUsd = estimateBundleGasUsd(mergedBundle, mergedBundle.chain);
+      const estGasUsd = estimateBundleGasUsdSync(mergedBundle, mergedBundle.chain);
       
       const finalMergedBundle: ClaimBundle = {
         ...mergedBundle,
