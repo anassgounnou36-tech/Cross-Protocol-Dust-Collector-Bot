@@ -74,13 +74,15 @@ export class TronClient implements ChainClient {
         txHash: mockTxHash,
         gasUsed: energyCost.toString(),
         gasUsd: gasUsdCost,
-        claimedUsd: bundle.totalUsd
+        claimedUsd: bundle.totalUsd,
+        chain: 'tron'
       };
     } catch (error) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        claimedUsd: 0
+        claimedUsd: 0,
+        chain: 'tron'
       };
     }
   }

@@ -1,9 +1,38 @@
-import type { Chain, Config } from '../types/common.js';
+import type { Chain } from '../types/common.js';
 
-// Token decimals mapping for common tokens
-const TOKEN_DECIMALS: Record<string, number> = {
+// In-memory cache with TTL for pricing data
+interface CacheEntry {
+  value: number;
+  timestamp: number;
+}
+
+const priceCache = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 30 * 1000; // 30 seconds
+
+function getCachedPrice(key: string): number | null {
+  const entry = priceCache.get(key);
+  if (!entry) return null;
+  
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    priceCache.delete(key);
+    return null;
+  }
+  
+  return entry.value;
+}
+
+function setCachedPrice(key: string, value: number): void {
+  priceCache.set(key, {
+    value,
+    timestamp: Date.now()
+  });
+}
+
+// Stable token configuration - placeholder list as specified
+const STABLE_TOKENS = ['USDC', 'USDT', 'DAI'];
+const TOKEN_DECIMALS_MAP: Record<string, number> = {
+  'USDC': 6,
   'USDT': 6,
-  'USDC': 6, 
   'DAI': 18,
   'AVAX': 18,
   'TRX': 6,
@@ -15,40 +44,45 @@ const TOKEN_DECIMALS: Record<string, number> = {
 };
 
 export function getTokenDecimals(symbol: string): number {
-  return TOKEN_DECIMALS[symbol.toUpperCase()] || 18;
+  return TOKEN_DECIMALS_MAP[symbol.toUpperCase()] || 18;
 }
 
-export function isStablecoin(symbol: string, config: Config): boolean {
-  return config.pricing.stableSymbols.includes(symbol.toUpperCase());
+export function isStablecoin(symbol: string): boolean {
+  return STABLE_TOKENS.includes(symbol.toUpperCase());
 }
 
-export async function quoteToUsd(
-  chain: Chain, 
-  tokenAddress: string, 
-  amountWei: string,
-  config: Config
-): Promise<number> {
+export async function quoteToUsd(chain: 'avalanche', token: string, amountWei: string): Promise<number> {
+  // Only support avalanche chain for now as specified
+  if (chain !== 'avalanche') {
+    console.warn(`quoteToUsd: Chain ${chain} not supported, only 'avalanche' is implemented`);
+    return 0;
+  }
+
+  const cacheKey = `${chain}:${token}`;
+  
   try {
-    // Extract token symbol from address (this is a simplified approach)
-    // TODO: Implement proper token symbol resolution via contract calls
-    const tokenSymbol = getTokenSymbolFromAddress(tokenAddress);
+    // Extract token symbol from address mapping
+    const tokenSymbol = getTokenSymbolFromAddress(token);
     
-    if (isStablecoin(tokenSymbol, config)) {
-      // For stablecoins, assume 1:1 USD parity
-      const decimals = getTokenDecimals(tokenSymbol);
+    // Check if it's a stable token
+    if (STABLE_TOKENS.includes(tokenSymbol.toUpperCase())) {
+      const decimals = TOKEN_DECIMALS_MAP[tokenSymbol.toUpperCase()] || 18;
       const amount = parseFloat(amountWei) / Math.pow(10, decimals);
+      
+      // Cache stable token price calculation
+      setCachedPrice(cacheKey, amount);
       return amount;
     }
 
-    // TODO: Implement real price fetching from:
-    // - DEX routers (Trader Joe, PancakeSwap, etc.)
-    // - Price oracles (Chainlink, etc.)
-    // - External APIs (CoinGecko, DeFiLlama, etc.)
+    // For non-stable tokens, placeholder TODO logic
+    console.warn(`quoteToUsd: Non-stable token pricing not implemented for ${tokenSymbol} on ${chain}. Returning 0.`);
+    // TODO: Implement router-based pricing (Trader Joe getAmountsOut, etc.)
+    // TODO: Implement oracle-based pricing (Chainlink, etc.)
+    // TODO: Implement external API pricing (CoinGecko, DeFiLlama, etc.)
     
-    console.warn(`quoteToUsd: Real pricing not implemented for ${tokenSymbol} on ${chain}. Returning 0.`);
     return 0;
   } catch (error) {
-    console.error(`Failed to quote ${tokenAddress} to USD:`, error);
+    console.error(`Failed to quote ${token} to USD on ${chain}:`, error);
     return 0;
   }
 }

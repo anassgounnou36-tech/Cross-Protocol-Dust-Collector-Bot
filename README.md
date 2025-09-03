@@ -16,6 +16,38 @@ The Cross-Protocol Dust Collector Bot helps users recover forgotten or unclaimed
 - **Comprehensive Logging**: Detailed execution logs and performance metrics
 - **Mock Mode**: Safe testing without real transactions
 
+## Implemented (Phase 1)
+
+✅ **Avalanche Chain Client**: Complete implementation with Chainlink price feeds and EIP-1559 support
+- `gasPrice()`: Returns maxFeePerGas with fallback to gasPrice
+- `nativeUsd()`: Chainlink AVAX/USD feed integration with fallback pricing  
+- `simulate()`: Transaction simulation with revert reason extraction
+- `sendRaw()`: Full transaction building and execution with gas cost calculation
+- Exported standalone functions for library-style usage
+
+✅ **Pricing Engine Skeleton**: Stable token support with 30-second in-memory cache
+- Support for USDC, USDT, DAI stable token pricing
+- `quoteToUsd()`: Returns USD value for stable tokens, placeholder for non-stable
+- Configurable token decimals mapping
+- Cache implementation with TTL for performance
+
+✅ **Gas Estimator**: Dynamic gas estimation using live chain data
+- `estimateBundleUsd()`: Estimates gas costs using current chain prices
+- Integration with Avalanche client `gasPrice()` and `nativeUsd()`
+- Default gas limits with override support
+- Sets `estGasUsd` on bundle objects
+
+✅ **Enhanced Types**: Extended interfaces for new functionality
+- `TxResult` includes chain field and status
+- `PendingReward` supports optional `estGasLimit`
+- Full backward compatibility maintained
+
+⏳ **Coming Next (Phase 2)**:
+- Tron chain client implementation
+- Router-based pricing (Trader Joe integration)
+- Advanced gas optimization strategies
+- Idempotency improvements
+
 ## Architecture
 
 ```
@@ -72,10 +104,15 @@ Copy `.env.example` to `.env` and configure:
 # Private keys for blockchain interactions
 PRIVATE_KEY_AVAX=your_avalanche_private_key_here
 PRIVATE_KEY_TRON=your_tron_private_key_here
+PRIVATE_KEY=your_avalanche_private_key_here
 
 # RPC endpoints
 PRICER_RPC_AVAX=https://api.avax.network/ext/bc/C/rpc
 PRICER_RPC_TRON=https://api.trongrid.io
+AVALANCHE_RPC_URL=https://api.avax.network/ext/bc/C/rpc
+
+# Chainlink price feeds
+CHAINLINK_AVAX_USD_FEED=0x0A77230d17318075983913bC2145DB16C7366156
 
 # Bot configuration
 MOCK_MODE=true

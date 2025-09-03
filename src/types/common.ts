@@ -15,6 +15,7 @@ export interface PendingReward {
   readonly claimTo: Address;
   readonly lastClaimAt?: Date;
   readonly discoveredAt: Date;
+  readonly estGasLimit?: number;
 }
 
 export interface ClaimBundle {
@@ -35,6 +36,8 @@ export interface TxResult {
   readonly gasUsed?: string;
   readonly gasUsd?: number;
   readonly claimedUsd: number;
+  readonly chain: Chain;
+  readonly status?: string;
 }
 
 export interface Integration {

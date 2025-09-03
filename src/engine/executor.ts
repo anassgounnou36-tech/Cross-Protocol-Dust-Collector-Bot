@@ -14,7 +14,8 @@ export async function execute(
       return {
         success: false,
         error,
-        claimedUsd: 0
+        claimedUsd: 0,
+        chain: bundle.chain
       };
     }
 
@@ -36,7 +37,8 @@ export async function execute(
     return {
       success: false,
       error: `Execution error: ${errorMessage}`,
-      claimedUsd: 0
+      claimedUsd: 0,
+      chain: bundle.chain
     };
   }
 }
@@ -89,7 +91,8 @@ export async function executeBatch(
         results.push({
           success: false,
           error: `Promise rejection: ${result.reason}`,
-          claimedUsd: 0
+          claimedUsd: 0,
+          chain: bundle.chain
         });
       }
     }

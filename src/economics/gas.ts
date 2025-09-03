@@ -1,5 +1,8 @@
 import type { ClaimBundle, Chain } from '../types/common.js';
 
+// Default gas limit for Avalanche claims
+const DEFAULT_AVAX_CLAIM_GAS = 120000;
+
 // Gas estimation constants - these would need to be tuned based on real data
 const GAS_ESTIMATES = {
   avalanche: {
@@ -80,4 +83,42 @@ export function updateGasEstimates(
   // TODO: Implement learning mechanism to improve gas estimates
   // Could use a rolling average or more sophisticated ML approach
   console.log(`Gas estimate feedback: ${chain} with ${itemCount} items cost ${actualGasUsd} USD`);
+}
+
+// New function as specified in requirements
+export async function estimateBundleUsd(bundle: ClaimBundle): Promise<number> {
+  try {
+    // Import avalanche client functions dynamically to avoid circular deps
+    const { gasPrice, nativeUsd } = await import('../chains/avalanche.js');
+    
+    let totalGasLimit = 0;
+    
+    // Calculate total gas limit for all claims in bundle
+    for (const claim of bundle.items) {
+      if (claim.estGasLimit) {
+        totalGasLimit += claim.estGasLimit;
+      } else {
+        // Use default heuristic constant as specified
+        totalGasLimit += DEFAULT_AVAX_CLAIM_GAS;
+      }
+    }
+    
+    // Get current gas price from chain client
+    const maxFeePerGas = await gasPrice();
+    
+    // Calculate gas cost in native token
+    const gasNative = Number(BigInt(totalGasLimit) * maxFeePerGas) / 1e18;
+    
+    // Convert to USD using chain client
+    const avaxUsd = await nativeUsd();
+    const gasUsd = gasNative * avaxUsd;
+    
+    // Set estGasUsd on bundle (mutating for backward compatibility)
+    (bundle as any).estGasUsd = gasUsd;
+    
+    return gasUsd;
+  } catch (error) {
+    console.error(`Failed to estimate bundle gas USD for bundle ${bundle.id}:`, error);
+    return 0;
+  }
 }
