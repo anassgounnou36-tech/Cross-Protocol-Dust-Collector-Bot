@@ -5,6 +5,8 @@ export class AvalancheClient implements ChainClient {
   readonly chain = 'avalanche' as const;
   private provider: ethers.JsonRpcProvider;
   private wallet?: ethers.Wallet;
+  private gasPriceCache?: { price: bigint; timestamp: number };
+  private readonly CACHE_TTL_MS = 30000; // 30 seconds cache
 
   constructor(rpcUrl: string, privateKey?: string) {
     this.provider = new ethers.JsonRpcProvider(rpcUrl);
@@ -15,8 +17,48 @@ export class AvalancheClient implements ChainClient {
   }
 
   async gasPrice(): Promise<bigint> {
-    const feeData = await this.provider.getFeeData();
-    return feeData.gasPrice || 25000000000n; // 25 gwei default
+    try {
+      // Check cache first
+      if (this.gasPriceCache) {
+        const age = Date.now() - this.gasPriceCache.timestamp;
+        if (age < this.CACHE_TTL_MS) {
+          return this.gasPriceCache.price;
+        }
+      }
+
+      const feeData = await this.provider.getFeeData();
+      
+      let gasPrice: bigint;
+      
+      // Handle EIP-1559 vs legacy gas pricing
+      if (feeData.gasPrice) {
+        gasPrice = feeData.gasPrice;
+      } else if (feeData.maxFeePerGas) {
+        // For EIP-1559, use maxFeePerGas as fallback
+        gasPrice = feeData.maxFeePerGas;
+      } else {
+        // Final fallback - 25 gwei default for Avalanche
+        gasPrice = 25000000000n;
+      }
+
+      // Cache the result
+      this.gasPriceCache = {
+        price: gasPrice,
+        timestamp: Date.now()
+      };
+
+      return gasPrice;
+    } catch (error) {
+      console.warn('Failed to fetch gas price from network, using default:', error instanceof Error ? error.message : 'Unknown error');
+      
+      // Return cached value if available, otherwise use default
+      if (this.gasPriceCache) {
+        return this.gasPriceCache.price;
+      }
+      
+      // Return safe default on network failure
+      return 25000000000n; // 25 gwei default
+    }
   }
 
   async nativeUsd(): Promise<number> {

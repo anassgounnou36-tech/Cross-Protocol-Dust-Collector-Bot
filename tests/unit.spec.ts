@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { groupByContract } from '../src/engine/bundler.js';
 import { Policy } from '../src/economics/policy.js';
 import { computeBundleHash, shouldSkipIdempotency, clearIdempotencyCache } from '../src/engine/idempotency.js';
-import { estimateBundleGasUsd } from '../src/economics/gas.js';
+import { estimateBundleGasUsdSync } from '../src/economics/gas.js';
 import type { PendingReward, ClaimBundle } from '../src/types/common.js';
 
 // Helper function to create test reward
@@ -194,7 +194,7 @@ describe('Engine Tests', () => {
         netUsd: 0
       };
 
-      const gasEstimate = estimateBundleGasUsd(bundle, 'avalanche');
+      const gasEstimate = estimateBundleGasUsdSync(bundle, 'avalanche');
       expect(gasEstimate).toBeGreaterThan(0);
     });
 
@@ -221,8 +221,8 @@ describe('Engine Tests', () => {
         netUsd: 0
       };
 
-      const smallGas = estimateBundleGasUsd(smallBundle, 'tron');
-      const largeGas = estimateBundleGasUsd(largeBundle, 'tron');
+      const smallGas = estimateBundleGasUsdSync(smallBundle, 'tron');
+      const largeGas = estimateBundleGasUsdSync(largeBundle, 'tron');
 
       expect(largeGas).toBeGreaterThan(smallGas);
     });
